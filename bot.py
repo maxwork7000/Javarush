@@ -48,7 +48,11 @@ async def date(update, context):
 
 
 async def date_dialog(update,context):
-    pass
+    text = update.message.text
+    my_message = await send_text(update, context, "typing...")
+    answer = await chatgpt.add_message(text)
+    await my_message.edit_text(answer)
+
 
 
 async def date_button(update,context):
@@ -58,10 +62,13 @@ async def date_button(update,context):
     await send_photo(update,context, query)
     await send_text(update, context, "Good choice! Invite girl or a nice guy to date with only a few messages")
 
+    prompt = load_prompt(query)
+    chatgpt.set_prompt(prompt)
+
 
 async def hello(update, context):
-    if dialog.mode == "gpt":
-        await gpt_dialog(update, context)
+    if dialog.mode == "date":
+        await date_dialog(update, context)
     else:
         await send_text(update, context, "*Hi and thank you for coming")
         await send_text(update, context, "*We will help you today!*")
@@ -78,7 +85,7 @@ async def hello_button(update, context):
     if query == "start":
         await send_text(update, context, "Process Started")
     else:
-        await send_text(update, context, "Process Stoped")
+        await send_text(update, context, "Process Stopped")
 
 
 dialog = Dialog()
