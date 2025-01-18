@@ -30,7 +30,35 @@ async def gpt_dialog(update, context):
     prompt = load_prompt("gpt")
     answer = await  chatgpt.send_question(prompt,text)
     await  send_text(update, context, answer)
-# Here we write our code :)
+
+
+async def date(update, context):
+        dialog.mode = "date"
+        text = load_message("date")
+        await send_photo(update, context, "date")
+        await send_text_buttons(update, context, text, {
+            "date_grande": "Ariana Grande",
+            "date_robbie": "Margo Robbi",
+            "date_zendaya":"Zendeya",
+            "date_gosling": "Rayan Gosling",
+            "date_hardy": "Tom Hardy"
+
+
+        })
+
+
+async def date_dialog(update,context):
+    pass
+
+
+async def date_button(update,context):
+    query = update.callback_query.data
+    await update.callback_query.answer()
+
+    await send_photo(update,context, query)
+    await send_text(update, context, "Good choice! Invite girl or a nice guy to date with only a few messages")
+
+
 async def hello(update, context):
     if dialog.mode == "gpt":
         await gpt_dialog(update, context)
@@ -62,6 +90,10 @@ chatgpt=ChatGptService("gpt:A03NYofv3ubgIx6f1SXnPAKmBZ0E9dS9Qcn2T2Zi1nOgo_QvJ0z8
 app = ApplicationBuilder().token("7496096792:AAEbmJ_oMSfnMnBSjZMP62x9NdBzAu89ykY").build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("gpt", gpt))
+app.add_handler(CommandHandler("date", date))
+
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hello))
+
+app.add_handler(CallbackQueryHandler(date_button, pattern="^date_.*"))
 app.add_handler(CallbackQueryHandler(hello_button))
 app.run_polling()
