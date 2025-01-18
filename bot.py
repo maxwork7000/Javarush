@@ -71,18 +71,35 @@ async def message(update, context):
     dialog.mode ="message"
     text = load_message("message")
     await send_photo(update, context, "message")
-    await send_text(update, context, text)
+    await send_text_buttons(update, context, text,{
+        "message_next": "Next message",
+        "message_date": "Invite to a date"
+    })
+    dialog.list.clear()
 
 async def message_button(update, context):
-    pass
+    query = update.callback_query.data
+    await update.callback_query.answer()
+    
+    prompt = load_prompt(query)
+    user_chat_history = "\a\a".join(dialog.list)
+    my_message = await send_text(update, context, "ChatGPT thinking about how to answer...")
+    answer = await chatgpt.send_question(prompt, user_chat_history)
+    await my_message.edit_text(answer)
 
 async def message_dialog(update, context):
-    pass
+    text = update.message.text
+    dialog.list.append(text)
 
 
 async def hello(update, context):
-    if dialog.mode == "date":
+    if dialog.mode == "gpt":
         await date_dialog(update, context)
+    if dialog.mode == "date":
+            await date_dialog(update, context)
+    if dialog.mode == "message":
+        await date_dialog(update, context)
+    
     else:
         await send_text(update, context, "*Hi and thank you for coming")
         await send_text(update, context, "*We will help you today!*")
@@ -104,6 +121,7 @@ async def hello_button(update, context):
 
 dialog = Dialog()
 dialog.mode = None
+dialog.list = []
 
 
 chatgpt=ChatGptService("gpt:A03NYofv3ubgIx6f1SXnPAKmBZ0E9dS9Qcn2T2Zi1nOgo_QvJ0z8W5cWFvJFkblB3TavDiNT25x1--mRNrTISss9Vj3Q6lCoImv5cXw51H8RE70DG7rsRaf4bEE4")
@@ -117,6 +135,7 @@ app.add_handler(CommandHandler("message", message))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hello))
 
 app.add_handler(CallbackQueryHandler(date_button, pattern="^date_.*"))
+app.add_handler(CallbackQueryHandler(message_button, pattern="^message_.*"))
 app.add_handler(CallbackQueryHandler(hello_button))
 app.run_polling()
 
