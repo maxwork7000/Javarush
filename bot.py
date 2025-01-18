@@ -32,6 +32,8 @@ async def gpt_dialog(update, context):
     await  send_text(update, context, answer)
 
 
+
+
 async def date(update, context):
         dialog.mode = "date"
         text = load_message("date")
@@ -64,6 +66,18 @@ async def date_button(update,context):
 
     prompt = load_prompt(query)
     chatgpt.set_prompt(prompt)
+
+async def message(update, context):
+    dialog.mode ="message"
+    text = load_message("message")
+    await send_photo(update, context, "message")
+    await send_text(update, context, text)
+
+async def message_button(update, context):
+    pass
+
+async def message_dialog(update, context):
+    pass
 
 
 async def hello(update, context):
@@ -98,9 +112,11 @@ app = ApplicationBuilder().token("7496096792:AAEbmJ_oMSfnMnBSjZMP62x9NdBzAu89ykY
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("gpt", gpt))
 app.add_handler(CommandHandler("date", date))
+app.add_handler(CommandHandler("message", message))
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hello))
 
 app.add_handler(CallbackQueryHandler(date_button, pattern="^date_.*"))
 app.add_handler(CallbackQueryHandler(hello_button))
 app.run_polling()
+
