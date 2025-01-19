@@ -80,7 +80,7 @@ async def message(update, context):
 async def message_button(update, context):
     query = update.callback_query.data
     await update.callback_query.answer()
-    
+
     prompt = load_prompt(query)
     user_chat_history = "\a\a".join(dialog.list)
     my_message = await send_text(update, context, "ChatGPT thinking about how to answer...")
@@ -92,6 +92,45 @@ async def message_dialog(update, context):
     dialog.list.append(text)
 
 
+async def profile(update, context):
+    dialog.mode = "profile"
+    text = load_message("profile")
+    await send_photo(update, context, "profile")
+    await send_text(update, context, text)
+
+    dialog.user.clear()
+    dialog.count = 0
+    await send_text(update, context, "How old are you?")
+
+async def profile_dialog(update, context):
+    text = update.message.text
+    dialog.count += 1
+
+    if dialog.count == 1:
+       dialog.user["age"]= text
+       await send_text(update, context, "What do you do?")
+    elif dialog.count == 2:
+       dialog.user["occupation"]= text
+       await send_text(update, context, "What is your hobby?")
+    elif dialog.count == 3:
+        dialog.user["hobby"]= text
+        await send_text(update, context, "What you dont like in people?")
+    elif dialog.count == 4:
+        dialog.user["annoys"]= text
+        await send_text(update, context, "What is your goal in dating?")
+    elif dialog.count == 5:
+          dialog.user["goals"]= text
+          prompt = load_prompt("profile")
+          user_info = dialog_user_info_to_str(dialog.user)
+
+          answer = await chatgpt.send_question(prompt, user_info)
+          await send_text(update, context, answer)
+
+
+
+
+
+
 async def hello(update, context):
     if dialog.mode == "gpt":
         await date_dialog(update, context)
@@ -99,7 +138,7 @@ async def hello(update, context):
             await date_dialog(update, context)
     if dialog.mode == "message":
         await date_dialog(update, context)
-    
+
     else:
         await send_text(update, context, "*Hi and thank you for coming")
         await send_text(update, context, "*We will help you today!*")
@@ -122,6 +161,8 @@ async def hello_button(update, context):
 dialog = Dialog()
 dialog.mode = None
 dialog.list = []
+dialog.count=0
+dialog.user = {}
 
 
 chatgpt=ChatGptService("gpt:A03NYofv3ubgIx6f1SXnPAKmBZ0E9dS9Qcn2T2Zi1nOgo_QvJ0z8W5cWFvJFkblB3TavDiNT25x1--mRNrTISss9Vj3Q6lCoImv5cXw51H8RE70DG7rsRaf4bEE4")
@@ -131,6 +172,7 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("gpt", gpt))
 app.add_handler(CommandHandler("date", date))
 app.add_handler(CommandHandler("message", message))
+app.add_handler(CommandHandler("profile", profile))
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hello))
 
@@ -138,4 +180,5 @@ app.add_handler(CallbackQueryHandler(date_button, pattern="^date_.*"))
 app.add_handler(CallbackQueryHandler(message_button, pattern="^message_.*"))
 app.add_handler(CallbackQueryHandler(hello_button))
 app.run_polling()
+
 
