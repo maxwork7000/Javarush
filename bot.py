@@ -129,13 +129,13 @@ async def profile_dialog(update, context):
 
 async def hello(update, context):
     if dialog.mode == "gpt":
-        await date_dialog(update, context)
+        await gpt_dialog(update, context)
     if dialog.mode == "date":
             await date_dialog(update, context)
     if dialog.mode == "message":
-        await date_dialog(update, context)
+        await message_dialog(update, context)
     if dialog.mode == "profile":
-        await date_dialog(update, context)
+        await profile_dialog(update, context)
 
     else:
         await send_text(update, context, "*Hi and thank you for coming")
@@ -178,3 +178,4 @@ app.add_handler(CallbackQueryHandler(date_button, pattern="^date_.*"))
 app.add_handler(CallbackQueryHandler(message_button, pattern="^message_.*"))
 app.add_handler(CallbackQueryHandler(hello_button))
 app.run_polling()
+
