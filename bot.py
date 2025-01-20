@@ -83,7 +83,7 @@ async def message_button(update, context):
 
     prompt = load_prompt(query)
     user_chat_history = "\a\a".join(dialog.list)
-    my_message = await send_text(update, context, "ChatGPT thinking about how to answer...")
+    my_message = await send_text(update, context, "ChatGPT 🧠thinking about how to answer...")
     answer = await chatgpt.send_question(prompt, user_chat_history)
     await my_message.edit_text(answer)
 
@@ -123,8 +123,41 @@ async def profile_dialog(update, context):
           prompt = load_prompt("profile")
           user_info = dialog_user_info_to_str(dialog.user)
 
-          answer = await chatgpt.send_question(prompt, user_info)
-          await send_text(update, context, answer)
+    my_message = await send_text(update, context, "ChatGPT 🧠 generating your profile...")
+    answer = await chatgpt.send_question(prompt, user_info)
+    await my_message.edit_text(answer)
+
+async def opener(update, context):
+    dialog.mode = "opener"
+    text = load_message("opener")
+    await send_photo(update, context, "opener")
+    await send_text(update, context, text)
+
+    dialog.user.clear()
+    dialog.count = 0
+    await send_text(update, context, "Girls name?")
+
+async def opener_dialog(update, context):
+    text = update.message.text
+    dialog.count += 1
+
+    if dialog.count == 1:
+        dialog.user["name"] = text
+        await send_text(update, context, "Girls age?")
+    elif dialog.count == 2:
+        dialog.user["age"] = text
+        await send_text(update, context, "Judge by her look: score 1-10")
+    elif dialog.count == 3:
+        dialog.user["handsome"] = text
+        await send_text(update, context, "What she work as?")
+    elif dialog.count == 4:
+        dialog.user["occupation"] = text
+        await send_text(update, context, "Dating goal?")
+    elif dialog.count == 5:
+        dialog.user["goals"] = text
+        prompt = load_prompt("opener")
+        user_info = dialog_user_info_to_str(dialog. user_info)
+        await send_text(update, context, answer)
 
 
 async def hello(update, context):
@@ -136,6 +169,8 @@ async def hello(update, context):
         await message_dialog(update, context)
     if dialog.mode == "profile":
         await profile_dialog(update, context)
+    if dialog.mode == "openere":
+        await opener_dialog(update, context)
 
     else:
         await send_text(update, context, "*Hi and thank you for coming")
@@ -171,6 +206,7 @@ app.add_handler(CommandHandler("gpt", gpt))
 app.add_handler(CommandHandler("date", date))
 app.add_handler(CommandHandler("message", message))
 app.add_handler(CommandHandler("profile", profile))
+app.add_handler(CommandHandler("opener", opener))
 
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, hello))
 
