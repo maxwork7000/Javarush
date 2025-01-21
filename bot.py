@@ -156,7 +156,9 @@ async def opener_dialog(update, context):
     elif dialog.count == 5:
         dialog.user["goals"] = text
         prompt = load_prompt("opener")
-        user_info = dialog_user_info_to_str(dialog. user_info)
+        user_info = dialog_user_info_to_str(dialog.user)
+
+        answer = await chatgpt.send_question(prompt, user_info)
         await send_text(update, context, answer)
 
 
@@ -169,7 +171,7 @@ async def hello(update, context):
         await message_dialog(update, context)
     if dialog.mode == "profile":
         await profile_dialog(update, context)
-    if dialog.mode == "openere":
+    if dialog.mode == "opener":
         await opener_dialog(update, context)
 
     else:
